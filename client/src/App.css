@@ -1,0 +1,55 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.tweet-form {
+  background-color: #ebebeb;
+  padding: 12px;
+}
+
+.tweet-box {
+  border: 1px solid;
+  padding: 3px;
+  width: 75%;
+  margin-bottom: 10px;
+}
+
+.tweet-header {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.tweet-body {
+  display: flex;
+  justify-content: space-around;
+}
+
+.tweet-container {
+  margin-top: 10px;
+}
