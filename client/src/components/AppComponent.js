@@ -1,5 +1,6 @@
 import React from 'react';
 import { Form, FormGroup, ControlLabel, FormControl, Button } from 'react-bootstrap';
+import TweetContainer from './TweetContainer';
 
 const AppComponent = (props) => {
   return (
@@ -35,15 +36,21 @@ const AppComponent = (props) => {
           return (
             <div className="tweet-box" key={tweet.id}>
               <div className="tweet-header">
-                {tweet.text}
-              </div>
-              <div className="tweet-body">
-                <div>
-                  Image
+                <div className="media">
+                  {tweet.extended_entities && tweet.extended_entities.media[0].type === "photo" && (
+                    <img
+                      style={{width: '80%', height: 'auto'}}
+                      src={tweet.extended_entities.media["0"].media_url}
+                      alt="user tweet image" />)
+                  }
+                  {tweet.extended_entities && (tweet.extended_entities.media[0].type === "animated_gif"
+                  || tweet.extended_entities.media[0].type === "video") && (
+                    <video width="100%" height="250px" name="media" controls>
+                      <source src={tweet.extended_entities.media["0"].video_info.variants[0].url} type="video/mp4" />
+                    </video>)
+                  }
                 </div>
-                <div>
-                  Content
-                </div>
+                <TweetContainer {...tweet}/>
               </div>
             </div>
           )

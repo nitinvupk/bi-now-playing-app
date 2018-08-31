@@ -7,11 +7,24 @@ class App extends Component {
   state = {
     tweets: [],
     url: null,
-    comment: null
+    comment: null,
+    geolocation: {},
   };
 
-  componentDidMount() {
+  getPositionAndGetTweets = ({ coords }) => {
+    this.setState(prevProps =>
+      ({ ...prevProps,
+        geolocation: { latitude: coords.latitude, longitude: coords.longitude },
+      }));
     this.getTweets();
+  };
+
+  getUserLocation = () => {
+    navigator.geolocation.getCurrentPosition(this.getPositionAndGetTweets);
+  }
+
+  componentDidMount() {
+    this.getUserLocation();
   }
 
   handleChange = (key, value) => {
@@ -20,17 +33,20 @@ class App extends Component {
   }
 
   getTweets = () => {
-    axios.get(`http://localhost:5000/api/tweets`)
+    const { geolocation } = this.state;
+    axios.get(`http://localhost:5000/api/tweets?lat=${geolocation.latitude}&lon=${geolocation.longitude}`)
       .then(res => {
         this.setState({tweets: res.data.tweets.statuses})
-      });
+    });
   }
 
   createNewTweet = (event) => {
     event.preventDefault();
     axios.post('http://localhost:5000/api/tweet', {
       url: this.state.url,
-      comment: this.state.comment
+      comment: this.state.comment,
+      lat: this.state.geolocation.latitude,
+      lon: this.state.geolocation.longitude,
     }, {
       headers: {
         'Content-Type': 'application/json'

@@ -18,7 +18,9 @@ var client = new Twitter({
 });
 
 app.get('/api/tweets', (req, res) => {
-  var params = {q: 'nowplaying', count: 5};
+  // for searching tweets with the geocodes
+  const geocode = `${req.query.lat} ${req.query.lon} 10mi`;
+  var params = {q: 'nowplaying', count: 50 };
   client.get('search/tweets', params, (error, tweets, response) => {
     if(error) throw error;
     res.send({ tweets: tweets });
@@ -26,7 +28,12 @@ app.get('/api/tweets', (req, res) => {
 });
 
 app.post('/api/tweet', (req, res) => {
-  const params = {status: req.body.comment + " #nowplaying " + req.body.url};
+  const params = {
+    status: req.body.comment + " #nowplaying " + req.body.url,
+    lat: req.body.lat,
+    long: req.body.lon,
+    display_coordinates: true
+  };
   client.post('statuses/update', params, (error, tweet, response) => {
     console.log(error, tweet);
     if(error) throw error;
