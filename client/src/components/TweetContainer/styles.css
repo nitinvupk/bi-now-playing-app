@@ -329,3 +329,7 @@ a {
   font-weight: 400;
   margin-left: 8px;
 }
+
+.tweet-content span {
+  margin-right: 5px;
+}

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import AppComponent from './components/AppComponent';
 import axios from 'axios';
+import socketIOClient from "socket.io-client";
 
 class App extends Component {
   state = {
@@ -11,24 +12,22 @@ class App extends Component {
     geolocation: {},
   };
 
-  getPositionAndGetTweets = ({ coords }) => {
+  getTweetswithCoords = ({ coords }) => {
     this.setState(prevProps =>
       ({ ...prevProps,
         geolocation: { latitude: coords.latitude, longitude: coords.longitude },
       }));
     this.getTweets();
+    const { geolocation } = this.state;
+    const socket = socketIOClient(`http://localhost:5000?lat=${geolocation.latitude}&lon=${geolocation.longitude}`);
+    socket.on("getRecentTweets", res => this.setState(prevProps => ({ ...prevProps, tweets: res.tweets.statuses })));
   };
 
-  getUserLocation = () => {
-    navigator.geolocation.getCurrentPosition(this.getPositionAndGetTweets);
-  }
-
   componentDidMount() {
-    this.getUserLocation();
+    navigator.geolocation.getCurrentPosition(this.getTweetswithCoords);
   }
 
   handleChange = (key, value) => {
-    console.log(key, value);
     this.setState({ ...this.state, [key]: value });
   }
 
@@ -40,26 +39,29 @@ class App extends Component {
     });
   }
 
-  createNewTweet = (event) => {
+  concatTweets = async () => {
+    const { geolocation, tweets } = this.state;
+    if (!tweets[0]) return;
+    const moreTweets = await axios.get(`http://localhost:5000/api/tweets?lat=${geolocation.latitude}&lon=${geolocation.longitude}&maxId=${tweets[tweets.length - 1].id_str}`);
+    this.setState(prevProps => ({...prevProps, tweets: [...prevProps.tweets, ...moreTweets.data.tweets.statuses]}));
+  }
+
+  createNewTweet = async (event) => {
     event.preventDefault();
-    axios.post('http://localhost:5000/api/tweet', {
-      url: this.state.url,
-      comment: this.state.comment,
-      lat: this.state.geolocation.latitude,
-      lon: this.state.geolocation.longitude,
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then(res => {
-      console.log(res);
-    });
+    const { url, comment, geolocation } = this.state;
+    await axios.post('http://localhost:5000/api/tweet',
+    {
+      url, comment,
+      lat: geolocation.latitude,
+      lon: geolocation.longitude,
+    }, { headers: { 'Content-Type': 'application/json' }});
+    this.getTweets();
   }
 
   render() {
-    console.log(this.state)
     return (
       <AppComponent {...this.state}
+        concatTweets={this.concatTweets}
         createNewTweet={this.createNewTweet}
         handleChange={this.handleChange}
       />
